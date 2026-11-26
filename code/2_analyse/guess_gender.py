@@ -4,10 +4,16 @@ import torch
 from PIL import Image
 from transformers import CLIPModel, CLIPProcessor
 
-label = sys.argv[1] if len(sys.argv) > 1 else "video"
+import sys as _s
+from pathlib import Path as _P
+_s.path.insert(0, str(_P(__file__).resolve().parents[1]))
+from paths import where
+label = sys.argv[1]
+D = where(label, "data")
+O = where(label, "outputs")
 
 # 1. Only the countable people from the analysis table
-people = pd.read_csv(f"data/people_{label}.csv")
+people = pd.read_csv(D / "people.csv")
 people = people[people["countable"]].copy()
 
 # 2. Load CLIP: a model that matches pictures to sentences
@@ -27,7 +33,7 @@ texts = [
 # 4. For each person's best picture: how likely is "woman" against "man"?
 p_woman = []
 for pid in people["track_id"]:
-    path = f"outputs/crops/{label}/{pid}.jpg"
+    path = str(O / "crops" / f"{pid}.jpg")
     im = Image.open(path).convert("RGB")
     inputs = processor(text=texts, images=im, return_tensors="pt", padding=True)
     with torch.no_grad():
@@ -44,5 +50,5 @@ people["gender_guess"] = "uncertain"
 people.loc[people["p_woman"] >= 0.65, "gender_guess"] = "woman"
 people.loc[people["p_woman"] <= 0.35, "gender_guess"] = "man"
 
-people.to_csv(f"data/gender_{label}.csv", index=False)
+people.to_csv(D / "gender.csv", index=False)
 print(pd.crosstab(people["movement"], people["gender_guess"]))

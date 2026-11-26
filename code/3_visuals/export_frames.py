@@ -1,17 +1,23 @@
 """Save annotated frames of one video into a folder (one picture every STEP seconds).
-Run: python code/export_frames.py "<video path>" video5 1
+Run: python code/export_frames.py video5 1
 The last number is the gap in seconds (1 = one picture per second, 0 = every frame).
 """
 import sys
 from pathlib import Path
+import sys as _s
+from pathlib import Path as _P
+_s.path.insert(0, str(_P(__file__).resolve().parents[1]))
+from paths import where, video_file
 import cv2
 import pandas as pd
 
-video, label = sys.argv[1], sys.argv[2]
-step = float(sys.argv[3]) if len(sys.argv) > 3 else 1.0
+label = sys.argv[1]
+video = video_file(label)
+step = float(sys.argv[2]) if len(sys.argv) > 2 else 1.0
+D = where(label, "data")
 
-det = pd.read_csv(f"data/detections_{label}.csv")
-gen = pd.read_csv(f"data/gender_{label}.csv").set_index("track_id")
+det = pd.read_csv(D / "detections.csv")
+gen = pd.read_csv(D / "gender.csv").set_index("track_id")
 det = det[(det["class"] == 0) & (det.track_id.isin(gen.index))]
 by_frame = {f: g for f, g in det.groupby("frame")}
 
@@ -20,7 +26,7 @@ COL = {"woman": (17, 42, 164), "man": (194, 181, 123), "uncertain": (31, 156, 23
 TAG = {"woman": "W", "man": "M", "uncertain": "?"}
 MOVE = {"walking": "walk", "on_two_wheeler": "ride", "unsure": "unsure"}
 
-out = Path("outputs/frames") / label
+out = where(label, "outputs") / "frames"
 out.mkdir(parents=True, exist_ok=True)
 
 cap = cv2.VideoCapture(video)

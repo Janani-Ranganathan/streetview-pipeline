@@ -1,8 +1,13 @@
 import sys
 import pandas as pd
 
-label = sys.argv[1] if len(sys.argv) > 1 else "video"
-g = pd.read_csv(f"data/gender_{label}.csv")
+import sys as _s
+from pathlib import Path as _P
+_s.path.insert(0, str(_P(__file__).resolve().parents[1]))
+from paths import where
+label = sys.argv[1]
+D = where(label, "data")
+g = pd.read_csv(D / "gender.csv")
 
 # One row for each group: walking, unsure, on_two_wheeler
 rows = []
@@ -23,5 +28,5 @@ for move, grp in g.groupby("movement"):
     })
 
 out = pd.DataFrame(rows)
-out.to_csv(f"data/summary_{label}.csv", index=False)
+out.to_csv(D / "summary.csv", index=False)
 print(out.to_string(index=False))

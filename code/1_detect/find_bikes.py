@@ -3,8 +3,12 @@ import pandas as pd
 from ultralytics import YOLO
 
 # 1. Inputs: the video path and the same short label as before
-video = sys.argv[1]
-label = sys.argv[2] if len(sys.argv) > 2 else "video"
+import sys as _s
+from pathlib import Path as _P
+_s.path.insert(0, str(_P(__file__).resolve().parents[1]))
+from paths import where, video_file
+label = sys.argv[1]
+video = video_file(label)
 
 # 2. Look for bicycles (1) and motorcycles (3) with a low bar of 0.1
 model = YOLO("yolo11s.pt")
@@ -28,5 +32,5 @@ for i, r in enumerate(results):
             "x2": round(box[2]), "y2": round(box[3]),
         })
 
-pd.DataFrame(rows).to_csv(f"data/bikes_{label}.csv", index=False)
+pd.DataFrame(rows).to_csv(where(label, "data") / "bikes.csv", index=False)
 print(len(rows), "bike boxes saved")

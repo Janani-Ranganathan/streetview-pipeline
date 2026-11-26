@@ -13,23 +13,27 @@ The goal is one repeatable pipeline that works for any city. Later, the counts a
 
 | Step | Script | What it does |
 |---|---|---|
-| 1 | `code/track_people.py` | Detects and tracks people with YOLO11s. Saves every box in every picture, plus the best picture of each person (kept on the local machine only). |
-| 2 | `code/find_bikes.py` | A second, more sensitive pass for bicycles and motorbikes (confidence 0.1). Bikes under riders are often missed at 0.3. |
-| 3 | `code/analyse_tracks.py` | One row per person track. Removes non-people (the videographer's hand, number plates) and tiny far figures. Labels each person walking, on_two_wheeler or unsure, using overlap with bike boxes. |
-| 4 | `code/guess_gender.py` | Zero-shot CLIP (ViT-L/14) on the best picture: woman or man, with an "uncertain" zone. |
-| 5 | `code/summarise.py` | Counts per group and the women's share as a range. |
-| 6 | `code/export_frames.py` | Saves annotated frames of the video (boxes coloured by woman, man or uncertain, labelled walk, ride or unsure) into `outputs/frames/`. Local only, because the pictures show real people. |
+| 1 | `code/1_detect/track_people.py` | Detects and tracks people with YOLO11s. Saves every box in every picture, plus the best picture of each person (kept on the local machine only). |
+| 2 | `code/1_detect/find_bikes.py` | A second, more sensitive pass for bicycles and motorbikes (confidence 0.1). Bikes under riders are often missed at 0.3. |
+| 3 | `code/2_analyse/analyse_tracks.py` | One row per person track. Removes non-people (the videographer's hand, number plates) and tiny far figures. Labels each person walking, on_two_wheeler or unsure, using overlap with bike boxes. |
+| 4 | `code/2_analyse/guess_gender.py` | Zero-shot CLIP (ViT-L/14) on the best picture: woman or man, with an "uncertain" zone. |
+| 5 | `code/2_analyse/summarise.py` | Counts per group and the women's share as a range. |
+| 6 | `code/3_visuals/export_frames.py` | Saves annotated frames of the video (boxes coloured by woman, man or uncertain, labelled walk, ride or unsure) into `outputs/frames/`. Local only, because the pictures show real people. |
+
+## Folder layout
+
+Every video gets one row in `data/videos.csv` (city, weekday or weekend, time band, video path). Results go to `data/<city>/<day_type>/<time_band>/<video>/` and pictures to `outputs/` with the same path. The scripts find the folder from that table, so you only type the video label.
 
 ## How to run
 
 ```
 pip install ultralytics transformers opencv-python pandas
-python code/track_people.py "<path to video>" video5
-python code/find_bikes.py "<path to video>" video5
-python code/analyse_tracks.py video5
-python code/guess_gender.py video5
-python code/summarise.py video5
-python code/export_frames.py "<path to video>" video5 0
+python code/1_detect/track_people.py video5
+python code/1_detect/find_bikes.py video5
+python code/2_analyse/analyse_tracks.py video5
+python code/2_analyse/guess_gender.py video5
+python code/2_analyse/summarise.py video5
+python code/3_visuals/export_frames.py video5 0
 ```
 
 Tested on Python 3.14, CPU only. The first run downloads model weights (YOLO11s about 18 MB, CLIP about 1.7 GB). Steps 1 and 2 take a few minutes per video. Steps 3 to 5 take seconds.

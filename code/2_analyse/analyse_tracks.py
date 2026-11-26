@@ -3,11 +3,17 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image, ImageDraw
 
-label = sys.argv[1] if len(sys.argv) > 1 else "video"
+import sys as _s
+from pathlib import Path as _P
+_s.path.insert(0, str(_P(__file__).resolve().parents[1]))
+from paths import where
+label = sys.argv[1]
+D = where(label, "data")
+O = where(label, "outputs")
 
 # 1. Read the two tables made by the slow scripts
-det = pd.read_csv(f"data/detections_{label}.csv")
-bikes = pd.read_csv(f"data/bikes_{label}.csv")
+det = pd.read_csv(D / "detections.csv")
+bikes = pd.read_csv(D / "bikes.csv")
 
 # 2. Keep only persons that have an ID number
 people = det[(det["class"] == 0) & (det["track_id"] != -1)].copy()
@@ -52,14 +58,14 @@ table["countable"] = (
 table["movement"] = "walking"
 table.loc[table["share_on_bike"] >= 0.3, "movement"] = "unsure"
 table.loc[table["share_on_bike"] >= 0.6, "movement"] = "on_two_wheeler"
-table.to_csv(f"data/people_{label}.csv", index=False)
+table.to_csv(D / "people.csv", index=False)
 
 ok = table[table["countable"]].sort_values("first_s")
 print(len(table), "tracks,", len(ok), "countable")
 print(ok["movement"].value_counts())
 
 # 7. Review sheet: one picture per countable person, 25 per page
-crops = Path(f"outputs/crops/{label}")
+crops = O / "crops"
 W, H = 200, 300
 for page, start in enumerate(range(0, len(ok), 25), start=1):
     chunk = ok.iloc[start:start + 25]
@@ -75,5 +81,5 @@ for page, start in enumerate(range(0, len(ok), 25), start=1):
             im.thumbnail((W - 4, H - 4))
             sheet.paste(im, (x + 2, y + 22))
         draw.text((x + 3, y + 5), f"id {row.track_id} {row.movement[:5]} {row.first_s:.0f}s", fill="black")
-    sheet.save(f"outputs/review_{label}_{page}.jpg")
+    sheet.save(str(O / f"review_{page}.jpg"))
 print("review sheets saved in outputs")

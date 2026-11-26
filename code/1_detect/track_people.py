@@ -3,11 +3,17 @@ from pathlib import Path
 import cv2
 import pandas as pd
 from ultralytics import YOLO
+import sys as _s
+from pathlib import Path as _P
+_s.path.insert(0, str(_P(__file__).resolve().parents[1]))
+from paths import where, video_file
 
 # 1. Inputs: the video path, and a short label for the output files
-video = sys.argv[1]
-label = sys.argv[2] if len(sys.argv) > 2 else "video"
-Path(f"outputs/crops/{label}").mkdir(parents=True, exist_ok=True)
+label = sys.argv[1]
+video = video_file(label)
+D = where(label, "data")
+O = where(label, "outputs")
+(O / "crops").mkdir(exist_ok=True)
 
 # 2. Pictures per second of the video
 cap = cv2.VideoCapture(video)
@@ -24,7 +30,7 @@ results = model.track(
     stream=True,
     verbose=False,
     save=True,
-    project=str(Path("outputs").resolve()),
+    project=str(O.resolve()),
     name="tracked",
     exist_ok=True,
 )
@@ -61,10 +67,10 @@ for i, r in enumerate(results):
                 x1, y1 = max(0, int(box[0])), max(0, int(box[1]))
                 crop = r.orig_img[y1:int(box[3]), x1:int(box[2])]
                 if crop.size > 0:
-                    cv2.imwrite(f"outputs/crops/{label}/{pid}.jpg", crop)
+                    cv2.imwrite(str(O / "crops" / f"{pid}.jpg"), crop)
 
 # 5. Save the big table of boxes
 table = pd.DataFrame(rows)
-table.to_csv(f"data/detections_{label}.csv", index=False)
+table.to_csv(D / "detections.csv", index=False)
 print(len(table), "boxes saved")
 print(table[table["class"] == 0]["track_id"].nunique(), "person tracks")
