@@ -18,6 +18,7 @@ The goal is one repeatable pipeline that works for any city. Later, the counts a
 | 3 | `code/analyse_tracks.py` | One row per person track. Removes non-people (the videographer's hand, number plates) and tiny far figures. Labels each person walking, on_two_wheeler or unsure, using overlap with bike boxes. |
 | 4 | `code/guess_gender.py` | Zero-shot CLIP (ViT-L/14) on the best picture: woman or man, with an "uncertain" zone. |
 | 5 | `code/summarise.py` | Counts per group and the women's share as a range. |
+| 6 | `code/export_frames.py` | Saves annotated frames of the video (boxes coloured by woman, man or uncertain, labelled walk, ride or unsure) into `outputs/frames/`. Local only, because the pictures show real people. |
 
 ## How to run
 
@@ -28,6 +29,7 @@ python code/find_bikes.py "<path to video>" video5
 python code/analyse_tracks.py video5
 python code/guess_gender.py video5
 python code/summarise.py video5
+python code/export_frames.py "<path to video>" video5 0
 ```
 
 Tested on Python 3.14, CPU only. The first run downloads model weights (YOLO11s about 18 MB, CLIP about 1.7 GB). Steps 1 and 2 take a few minutes per video. Steps 3 to 5 take seconds.
