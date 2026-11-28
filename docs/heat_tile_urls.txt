@@ -1,0 +1,2 @@
+gs://open-buildings-temporal-data/v1/geotiffs/3a524_2023_06_30/tile_QRmV1ZcMwPI.tif
+gs://open-buildings-temporal-data/v1/geotiffs/3a524_2023_06_30/tile_h6BXqAc59Qw.tif
