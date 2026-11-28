@@ -226,3 +226,4 @@ outputs/
 *.pt
 *.avi
 .venv-heat/
+cache/
