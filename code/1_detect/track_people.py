@@ -26,7 +26,7 @@ results = model.track(
     source=video,
     classes=[0, 1, 3],
     conf=0.3,
-    persist=True,
+    persist=True, tracker='botsort.yaml',
     stream=True,
     verbose=False,
     save=True,
