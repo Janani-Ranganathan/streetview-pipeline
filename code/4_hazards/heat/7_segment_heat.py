@@ -15,8 +15,8 @@ import paths
 
 FOLDER = r"D:\THESIS\10. Web tool\5. Data\1. heat data"
 BUFFER_M = 5  # street pixels within 5 m of the segment line
-# hour stamps are the END of each hour: morning = 6-10 am, midday = 10 am-3 pm, afternoon = 3-7 pm
-BINS = {"morning": range(7, 11), "midday": range(11, 16), "afternoon": range(16, 20)}
+# hour stamps are the END of each hour: morning = 6-10 am, midday = 10 am-3 pm, afternoon = 3-5 pm
+BINS = {"morning": range(7, 11), "midday": range(11, 16), "afternoon": range(16, 18)}
 
 label = sys.argv[1]
 utci_folder = paths.where(label, "outputs") / "heat_run" / "output" / "utci"
